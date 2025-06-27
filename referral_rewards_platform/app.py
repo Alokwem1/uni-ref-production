@@ -25,7 +25,7 @@ load_dotenv()
 app = Flask(__name__)
 csrf = CSRFProtect(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY") # Replace with a strong secret key
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///users.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///instance/app.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 app.config['SESSION_TYPE'] = 'filesystem'
