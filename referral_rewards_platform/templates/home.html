@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Welcome to UNI-REF{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .hero {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background: linear-gradient(to right, #e6e9ec7d, #b7bfc9);
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-weight: 700;
+    font-size: 2.75rem;
+    color: #212529;
+  }
+
+  .hero h1 span {
+    color: #198754;
+  }
+
+  .hero p.lead {
+    font-size: 1.1rem;
+    color: #495057;
+  }
+
+  .hero .btn-lg {
+    min-width: 180px;
+    padding: 0.7rem 1.4rem;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .footer-note {
+    margin-top: 3rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+
+  .hero-img {
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem auto 0;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.07);
+  }
+
+  .modal-content {
+    font-size: 0.96rem;
+  }
+
+  .modal-body h6 {
+    font-weight: bold;
+    margin-top: 1rem;
+    color: #343a40;
+  }
+
+  .modal-body ul {
+    padding-left: 1.2rem;
+  }
+
+  .modal-body li {
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-body p {
+    color: #495057;
+  }
+
+  .btn i {
+    margin-right: 6px;
+  }
+</style>
+
+<!-- 🌟 Hero Section -->
+<div class="hero">
+  <div class="container">
+    <h1>Welcome to <span>UNI-REF</span></h1>
+    <p class="lead mt-3">
+      Join Nigeria's most trusted referral-based earning platform.<br />
+      Earn ₦1,500 per verified referral, watch ads, and grow your income.
+    </p>
+
+    <!-- 🎨 Visual Asset -->
+    <img src="{{ url_for('static', filename='img/hero.png') }}" class="hero-img" alt="UNI-REF Hero Image" loading="lazy" />
+
+    <!-- CTA Buttons -->
+    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+      <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+      <a href="{{ url_for('register', ref=request.args.get('ref')) if request.args.get('ref') else url_for('register') }}" class="btn btn-success btn-lg">
+        <i class="fas fa-user-plus"></i> Register
+      </a>
+      <a href="{{ url_for('forgot_password') }}" class="btn btn-secondary btn-lg">
+        <i class="fas fa-unlock-alt"></i> Forgot Password
+      </a>
+    </div>
+
+    <p class="footer-note">Powered by <strong>UNI-REF</strong> © {{ current_year }}</p>
+  </div>
+</div>
+
+<!-- 🛡️ Disclaimer Modal -->
+<div class="modal fade" id="disclaimerModal" tabindex="-1" aria-labelledby="disclaimerLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="disclaimerLabel">
+          <i class="fas fa-shield-alt me-2 text-warning"></i> UNI-REF Terms & Disclaimer
+        </h5>
+      </div>
+      <div class="modal-body">
+        <p><strong class="text-success">Welcome to UNI-REF</strong> — a decentralized, performance-based platform built for you.</p>
+
+        <h6 class="text-dark"><i class="fas fa-bolt text-warning me-1"></i> Key Features</h6>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-coins text-success me-2"></i> Earn ₦1,500 per verified referral</li>
+          <li><i class="fas fa-video text-primary me-2"></i> Receive $REF tokens for engaging with ads</li>
+          <li><i class="fas fa-wallet text-info me-2"></i> Easy payouts after reaching minimum balance</li>
+          <li><i class="fas fa-user-check text-secondary me-2"></i> Manual review ensures fairness for all users</li>
+        </ul>
+
+        <h6 class="text-dark mt-4"><i class="fas fa-exclamation-circle text-danger me-1"></i> Guidelines</h6>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-ban text-danger me-2"></i> No ROI or promised profits — not an investment platform</li>
+          <li><i class="fas fa-chart-line text-warning me-2"></i> Earnings depend on performance and engagement</li>
+          <li><i class="fas fa-user-times text-dark me-2"></i> Fake or multiple accounts will be banned</li>
+          <li><i class="fas fa-users text-success me-2"></i> Help grow the platform by sharing responsibly</li>
+        </ul>
+
+        <h6 class="text-dark mt-4"><i class="fas fa-lock text-primary me-1"></i> Data Privacy</h6>
+        <p><i class="fas fa-info-circle me-1 text-muted"></i> Only essential data is collected for account and reward safety. We never share your data.</p>
+
+        <h6 class="text-dark mt-4"><i class="fas fa-headset text-info me-1"></i> Need Help?</h6>
+        <p class="mb-2">
+          <i class="fab fa-telegram me-1 text-info"></i> Telegram: <a href="https://t.me/Uni_ref" target="_blank">@Uni_ref</a><br>
+          <i class="fab fa-twitter me-1 text-primary"></i> Twitter: <a href="https://twitter.com/Uni_ref_ads" target="_blank">@Uni_ref_ads</a><br>
+          <i class="fab fa-whatsapp me-1 text-success"></i> WhatsApp: <a href="https://wa.me/2348110129296?text=Hi%2C%20I%20want%20to%20book%20an%20ad%20slot%20on%20UNI-REF" target="_blank">Click to message</a>
+        </p>
+
+        <hr>
+        <p class="text-danger small mb-0">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          By clicking “I Agree”, you confirm you understand and accept all terms. We are not liable for personal financial expectations.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button id="agreeBtn" class="btn btn-primary w-100 fw-bold">
+          <i class="fas fa-check-circle me-1"></i> I Agree & Continue
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 🚀 Scripts -->
+<script>
+  function togglePassword() {
+    const input = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.replace("fa-eye-slash", "fa-eye");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const modal = new bootstrap.Modal(document.getElementById('disclaimerModal'), {
+      backdrop: 'static',
+      keyboard: false
+    });
+
+    const hasRef = new URLSearchParams(window.location.search).has('ref');
+    if (hasRef || !localStorage.getItem("uniRefDisclaimerAccepted")) {
+      modal.show();
+    }
+
+    document.getElementById("agreeBtn").addEventListener("click", function () {
+      localStorage.setItem("uniRefDisclaimerAccepted", "true");
+      modal.hide();
+    });
+  });
+</script>
+
+<!-- 🌐 Font Awesome (already included in base.html is fine) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+{% endblock %}

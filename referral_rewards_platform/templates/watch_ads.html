@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Watch & Earn | UNI-REF{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .ads-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+  }
+
+  .ad-container {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    background: #111;
+  }
+
+  .ad-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #0f0;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .ad-media {
+    width: 100%;
+    max-height: 60vh;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.1);
+    margin-bottom: 10px;
+  }
+
+  .reward-text {
+    font-size: 1rem;
+    color: #ccc;
+    text-align: center;
+  }
+
+  #toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #198754;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 5px;
+    font-weight: 600;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  }
+
+  .end-text {
+    color: #999;
+    font-size: 0.95rem;
+    padding: 3rem 0;
+    text-align: center;
+  }
+</style>
+
+<div class="text-center mb-4">
+    <a href="https://wa.me/2348110129296?text=Hi%2C%20I%20want%20to%20book%20an%20ad%20slot%20on%20UNI-REF"
+       class="btn btn-outline-success btn-lg" target="_blank">
+      <i class="fab fa-whatsapp me-1"></i> Message Admin on WhatsApp to Book Ad Space
+    </a>
+</div>
+<!-- ✅ Current Balance -->
+<div class="bg-dark text-white text-center py-2 sticky-top shadow-sm" style="top: 56px; z-index: 1040;">
+  <strong>Wallet Balance:</strong>
+  <span class="badge bg-success fs-6">+{{ user.ad_points }} $REF</span>
+</div>
+
+<!-- ✅ Ads Section -->
+<div class="ads-wrapper">
+  {% if ads %}
+    {% for ad in ads %}
+      <div class="ad-container" id="ad-{{ ad.id }}">
+        <div class="ad-title">{{ ad.ad_title }}</div>
+
+        {% if ad.ad_url.endswith('.mp4') %}
+          <video
+            src="{{ ad.ad_url }}"
+            class="ad-media"
+            muted
+            playsinline
+            preload="metadata"
+            controls
+            aria-label="Ad video from UNI-REF"
+            data-ad-id="{{ ad.id }}"
+            data-reward="{{ ad.reward }}"
+            data-duration="{{ ad.duration_seconds }}"
+            onplay="startWatchTimer(this)">
+          </video>
+        {% else %}
+          <img
+            src="{{ ad.ad_url }}"
+            class="ad-media"
+            alt="Ad Image"
+            aria-label="Ad image from UNI-REF"
+            data-ad-id="{{ ad.id }}"
+            data-reward="{{ ad.reward }}"
+            data-duration="{{ ad.duration_seconds }}"
+            {% if ad.id not in watched_ids %} onload="startWatchTimer(this)" {% endif %}>
+        {% endif %}
+
+        <p id="reward-status-{{ ad.id }}" class="reward-text">
+          {% if ad.id in watched_ids %}
+            <i class="fa-solid fa-check-circle text-success"></i> Already rewarded
+          {% else %}
+            <i class="fa-solid fa-clock"></i> Watch {{ ad.duration_seconds }}s to earn +{{ ad.reward }} $REF
+          {% endif %}
+        </p>
+
+        <div id="countdown-{{ ad.id }}" class="text-info fw-semibold mt-2"></div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center text-muted py-5">
+      <i class="fa-solid fa-circle-info fa-2x mb-2"></i><br>
+      No ads are available at the moment. Please check back later.
+    </div>
+  {% endif %}
+  <div class="end-text">🎉 You've reached the end of available ads. Come back later for more!</div>
+</div>
+
+<!-- ✅ Toast Notification -->
+<div id="toast"><i class="fa-solid fa-bolt"></i> +1 $REF Earned!</div>
+
+<!-- ✅ JavaScript -->
+<script>
+  const watchTimers = {};
+
+  function startWatchTimer(el) {
+    const adId = el.dataset.adId;
+    const reward = parseInt(el.dataset.reward) || 1;
+    const duration = parseInt(el.dataset.duration) || 30;
+
+    const statusText = document.getElementById("reward-status-" + adId);
+    const countdownEl = document.getElementById("countdown-" + adId);
+
+    if (!statusText || statusText.innerText.includes("✅") || watchTimers[adId]) return;
+    if (statusText.innerText.includes("Already rewarded")) return;
+
+    let secondsLeft = duration;
+    countdownEl.innerText = `⏳ ${secondsLeft}s remaining...`;
+
+    watchTimers[adId] = setInterval(() => {
+      secondsLeft--;
+      countdownEl.innerText = `⏳ ${secondsLeft}s remaining...`;
+
+      if (secondsLeft <= 0) {
+        clearInterval(watchTimers[adId]);
+        countdownEl.innerText = "";
+
+        fetch("/reward_ad", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ad_id: adId })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "rewarded") {
+            statusText.innerHTML = `<i class="fa-solid fa-check-circle text-success"></i> You earned +${reward} $REF`;
+            showToast(`+${reward} $REF Earned!`);
+          } else {
+            statusText.innerHTML = "<span class='text-warning'>⚠️ Already rewarded or error.</span>";
+          }
+        })
+        .catch(() => {
+          statusText.innerHTML = "<span class='text-danger'>❌ Network error.</span>";
+        });
+      }
+    }, 1000);
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerHTML = `<i class="fa-solid fa-bolt"></i> ${message}`;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 2500);
+  }
+</script>
+
+<!-- ✅ Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+{% endblock %}

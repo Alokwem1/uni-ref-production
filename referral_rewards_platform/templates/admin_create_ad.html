@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Create Ad | UNI-REF Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5" style="max-width: 700px;">
+  <h2 class="text-center text-primary mb-4">
+    <i class="fas fa-bullhorn me-1"></i> Create New Advertisement
+  </h2>
+
+  <!-- ✅ WhatsApp CTA -->
+  <div class="text-center mb-4">
+    <a href="https://wa.me/2348110129296?text=Hi%2C%20I%20want%20to%20book%20an%20ad%20slot%20on%20UNI-REF"
+       class="btn btn-outline-success btn-lg" target="_blank">
+      <i class="fab fa-whatsapp me-1"></i> Message Admin on WhatsApp to Book Ad Space
+    </a>
+  </div>
+
+  <!-- ✅ Ad Creation Form -->
+  <form method="POST" enctype="multipart/form-data" class="bg-white border rounded shadow-sm p-4" onsubmit="return disableButton();">
+    {% if form and form.csrf_token %}
+      {{ form.csrf_token }}
+    {% else %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="ad_title" class="form-label">📌 Ad Title</label>
+      <input type="text" class="form-control" id="ad_title" name="ad_title" placeholder="Enter ad title" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="ad_url" class="form-label">🔗 Ad URL (Optional)</label>
+      <input type="url" class="form-control" id="ad_url" name="ad_url" placeholder="https://example.com">
+      <small class="text-muted">Use YouTube, website, or landing page URL.</small>
+    </div>
+
+    <div class="mb-3">
+      <label for="ad_file" class="form-label">🖼️ Upload Media (Optional)</label>
+      <input type="file" class="form-control" id="ad_file" name="ad_file" accept=".mp4,.mp3,.jpg,.jpeg,.png,.gif">
+      <small class="text-muted">Accepted: MP4, MP3, JPG, PNG, GIF.</small>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="reward" class="form-label">🎁 Reward (in $REF)</label>
+        <input type="number" class="form-control" id="reward" name="reward" min="1" value="10" required>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="duration" class="form-label">⏳ Watch Time (minutes)</label>
+        <input type="number" class="form-control" id="duration" name="duration" min="1" max="30" value="5" required>
+        <small class="text-muted">User must watch for this duration to earn.</small>
+      </div>
+    </div>
+
+    <div class="mb-4">
+      <label for="schedule" class="form-label">📆 Schedule Duration</label>
+      <select class="form-select" id="schedule" name="schedule" required>
+        <option value="12h">12 Hours</option>
+        <option value="24h" selected>24 Hours</option>
+        <option value="3d">3 Days</option>
+        <option value="7d">7 Days</option>
+      </select>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn btn-success w-100 fw-bold">
+      <i class="fas fa-bullhorn me-1"></i> Publish Ad
+    </button>
+  </form>
+
+  <!-- ✅ Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="mt-4">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+</div>
+
+<!-- ✅ JS -->
+<script>
+  function disableButton() {
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Publishing...';
+    return true;
+  }
+</script>
+
+<!-- ✅ Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}

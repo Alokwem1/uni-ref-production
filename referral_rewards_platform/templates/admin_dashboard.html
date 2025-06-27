@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | UNI-REF</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="bg-light">
+
+<div class="card p-4 shadow-sm">
+  <h1 class="text-center text-dark fw-bold mb-4">
+    <i class="fas fa-user-shield text-primary me-2"></i>Admin Dashboard
+  </h1>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Navigation -->
+  <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+    <a href="{{ url_for('view_cashout_requests') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-money-check-alt me-1"></i>Cashout Requests
+    </a>
+    <a href="{{ url_for('create_ad') }}" class="btn btn-outline-primary">
+      <i class="fas fa-bullhorn me-1"></i>Create Ad
+    </a>
+    <a href="{{ url_for('manage_ads') }}" class="btn btn-outline-info">
+      <i class="fas fa-rectangle-ad me-1"></i>Manage Ads
+    </a>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-danger">
+      <i class="fas fa-sign-out-alt me-1"></i>Logout
+    </a>
+  </div>
+
+  <!-- Payment Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover text-center align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>User ID</th>
+          <th>Method</th>
+          <th>Txn ID</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Proof</th>
+          <th>Status</th>
+          <th>Comment</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if payments.items %}
+          {% for payment in payments.items %}
+          <tr>
+            <td>{{ payment.id }}</td>
+            <td>{{ payment.user_id }}</td>
+            <td>{{ payment.payment_method }}</td>
+            <td>{{ payment.transaction_id }}</td>
+            <td>{{ payment.payment_date.strftime('%Y-%m-%d') if payment.payment_date else 'N/A' }}</td>
+            <td>₦{{ "{:,.2f}".format(payment.amount) }}</td>
+            <td>
+              {% if payment.proof %}
+                <a href="{{ url_for('static', filename='uploads/' + payment.proof) }}" target="_blank">
+                  <img src="{{ url_for('static', filename='uploads/' + payment.proof) }}" alt="Proof" width="90" class="img-thumbnail" />
+                </a>
+              {% else %}
+                <span class="text-danger">No Proof</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge 
+                {% if payment.status == 'Approved' %}bg-success
+                {% elif payment.status == 'Rejected' %}bg-danger
+                {% else %}bg-warning text-dark{% endif %}">
+                {{ payment.status }}
+              </span>
+            </td>
+            <td>{{ payment.admin_comment or '—' }}</td>
+            <td>
+              <form method="POST" class="text-start">
+                {{ forms[payment.id].hidden_tag() }}
+                <textarea name="{{ forms[payment.id].comment.name }}" class="form-control mb-2" rows="2" placeholder="Admin comment...">{{ forms[payment.id].comment.data or '' }}</textarea>
+                <input type="hidden" name="{{ forms[payment.id].payment_id.name }}" value="{{ forms[payment.id].payment_id.data }}">
+                <div class="d-grid gap-2">
+                  <button type="submit" name="{{ forms[payment.id].approve.name }}" value="1" class="btn btn-success btn-sm">
+                    <i class="fas fa-check-circle me-1"></i>Approve
+                  </button>
+                  <button type="submit" name="{{ forms[payment.id].reject.name }}" value="1" class="btn btn-danger btn-sm">
+                    <i class="fas fa-times-circle me-1"></i>Reject
+                  </button>
+                </div>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10" class="text-center text-muted py-4">
+              <i class="fas fa-folder-open fa-2x mb-2"></i><br>
+              No payment requests found.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between mt-4">
+    {% if payments.has_prev %}
+      <a href="{{ url_for('admin_dashboard', page=payments.prev_num) }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-1"></i> Previous
+      </a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    {% if payments.has_next %}
+      <a href="{{ url_for('admin_dashboard', page=payments.next_num) }}" class="btn btn-outline-primary ms-auto">
+        Next <i class="fas fa-arrow-right ms-1"></i>
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

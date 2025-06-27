@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - UNI-REF{% endblock %}
+
+{% block content %}
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Custom Style -->
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .dashboard-heading {
+    font-size: 2.1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+
+  .dashboard-subtext {
+    font-size: 0.98rem;
+    color: #ced4da;
+  }
+
+  .logo-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .logo-welcome img {
+    max-height: 80px;
+  }
+
+  .referral-link-input {
+    font-size: 0.95rem;
+  }
+
+  .card {
+    border-radius: 14px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .btn-copy:hover {
+    background-color: #0dcaf0;
+    color: white;
+  }
+
+  .pagination {
+    justify-content: center;
+  }
+
+  .toast {
+    animation: slideIn 0.5s ease-in-out;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+
+<div class="container mt-5 pt-4">
+
+  <!-- 🔰 Branding + Welcome -->
+  <div class="text-center mb-5">
+    <div class="logo-welcome">
+      <img src="{{ url_for('static', filename='img/your_logo.png') }}" alt="UNI-REF Logo" class="img-fluid" onerror="this.style.display='none'">
+      <div class="text-start text-light">
+        <h2 class="dashboard-heading mb-1"><i class="fas fa-user-circle me-2"></i>Hello, {{ user.username }}</h2>
+        <p class="dashboard-subtext mb-0">
+          Welcome to your dashboard — manage referrals, track your earnings and keep growing.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🟩 Summary Cards -->
+  <div class="row g-4">
+    <!-- Invite Link -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h5 class="card-title text-info"><i class="fas fa-link me-1"></i> Your Referral Link</h5>
+          <p class="text-muted">Share & earn ₦1,500 per verified signup.</p>
+          <div class="input-group">
+            <input type="text" class="form-control referral-link-input" id="referralLink" value="{{ request.host_url }}register?ref={{ user.referral_code }}" readonly>
+            <button class="btn btn-outline-info btn-copy" onclick="copyToClipboard()" aria-label="Copy referral link">
+              <i class="fas fa-copy me-1"></i> Copy
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Earnings -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title text-success"><i class="fas fa-wallet me-1"></i> Total Earnings</h5>
+          <h2 class="fw-bold text-success mb-3">₦{{ total_earnings }}</h2>
+          <a href="{{ url_for('cashout') }}" class="btn btn-success w-100 {% if total_earnings < 15000 %}disabled{% endif %}" title="{% if total_earnings < 15000 %}Minimum ₦15,000 required{% else %}Withdraw now{% endif %}">
+            <i class="fas fa-hand-holding-usd me-1"></i> Cash Out
+          </a>
+          <p class="small text-muted mt-2">Minimum withdrawal: ₦15,000</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👥 Referrals -->
+  <div class="card shadow-sm mt-5">
+    <div class="card-body">
+      <h5 class="card-title mb-3"><i class="fas fa-users me-1"></i> Referral History</h5>
+
+      {% if referrals %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover table-sm align-middle text-center">
+            <thead class="table-dark">
+              <tr>
+                <th>Username</th>
+                <th>Joined</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for referral in referrals %}
+              <tr>
+                <td><strong>{{ referral.username }}</strong></td>
+                <td>{{ referral.date_joined or 'N/A' }}</td>
+                <td>
+                  <span class="badge rounded-pill 
+                    {% if referral.payment_status == 'Completed' %}bg-success
+                    {% elif referral.payment_status == 'Pending' %}bg-warning text-dark
+                    {% else %}bg-secondary{% endif %}">
+                    {{ referral.payment_status }}
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+
+      <!-- Pagination -->
+      {% if pagination.total_pages > 1 %}
+      <nav aria-label="Referral pagination">
+        <ul class="pagination mt-3 justify-content-center">
+
+          {% if pagination.has_prev %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('dashboard', page=pagination.prev_num) }}" aria-label="Previous">
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+            </li>
+          {% endif %}
+
+          {% for page_num in range(1, pagination.total_pages + 1) %}
+            {% if page_num == pagination.page %}
+              <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+              </li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for('dashboard', page=page_num) }}">{{ page_num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('dashboard', page=pagination.next_num) }}" aria-label="Next">
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+            </li>
+          {% endif %}
+
+        </ul>
+      </nav>
+      {% endif %}
+
+<!-- ✅ Toast Notification -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="copyToast" class="toast bg-success text-white align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body"><i class="fas fa-check-circle me-2"></i> Referral link copied!</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Script: Copy -->
+<script>
+  function copyToClipboard() {
+    const input = document.getElementById('referralLink');
+    input.select();
+    input.setSelectionRange(0, 99999); // For mobile
+    navigator.clipboard.writeText(input.value)
+      .then(() => {
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        toast.show();
+      })
+      .catch(() => alert("Unable to copy referral link."));
+  }
+</script>
+
+{% endblock %}

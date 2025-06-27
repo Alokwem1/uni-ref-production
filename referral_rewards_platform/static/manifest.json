@@ -1,0 +1,21 @@
+{
+  "name": "UNI-REF",
+  "short_name": "UNI-REF",
+  "start_url": "/watch_ads",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0f0",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

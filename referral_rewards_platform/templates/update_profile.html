@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Update Profile | UNI-REF{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark shadow-sm">
+  <div class="container-fluid">
+
+    <!-- ✅ Clickable Logo Only -->
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+      <img src="{{ url_for('static', filename='img/logo.png') }}"
+           alt="UNI-REF Logo"
+           class="d-inline-block align-middle"
+           style="height: 52px; max-height: 100%; object-fit: contain;">
+    </a>
+
+    <!-- ✅ Mobile Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- ✅ Navigation Links -->
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+            <i class="fas fa-chart-line me-1"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'watch_ads' %}active{% endif %}" href="{{ url_for('watch_ads') }}">
+            <i class="fas fa-play-circle me-1"></i> Watch & Earn
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'transactions' %}active{% endif %}" href="{{ url_for('transactions') }}">
+            <i class="fas fa-receipt me-1"></i> Transactions
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'update_profile' %}active{% endif %}" href="{{ url_for('update_profile') }}">
+            <i class="fas fa-user-edit me-1"></i> Profile
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt me-1"></i> Log Out
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<div class="container mt-5 pt-5" style="max-width: 500px;">
+  <div class="card shadow-sm p-4">
+    <h3 class="text-center text-primary mb-4">
+      <i class="fas fa-user-edit me-1"></i> Update Your Profile
+    </h3>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('update_profile') }}" onsubmit="return handleSubmit();">
+      {% if form and form.csrf_token %}
+        {{ form.csrf_token }}
+      {% else %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text"
+               class="form-control"
+               id="username"
+               name="username"
+               value="{{ current_user.username }}"
+               placeholder="Enter your username"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email"
+               class="form-control"
+               id="email"
+               name="email"
+               value="{{ current_user.email }}"
+               placeholder="Enter your email"
+               required>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">New Password <small class="text-muted">(optional)</small></label>
+        <input type="password"
+               class="form-control"
+               id="password"
+               name="password"
+               placeholder="Enter new password if changing">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-semibold">
+        <i class="fas fa-save me-1"></i> Save Changes
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Submit Spinner Script -->
+<script>
+  function handleSubmit() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+    return true;
+  }
+</script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Login | UNI-REF{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4" style="max-width: 500px;">
+  <h2 class="text-center text-primary mb-4"><i class="fa-solid fa-right-to-bracket me-2"></i>Log In to Your Account</h2>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Login Form -->
+  <form method="POST" action="{{ url_for('login') }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="mb-3">
+      <label for="username" class="form-label"><i class="fa-solid fa-user me-1"></i> Username</label>
+      <input type="text" class="form-control" id="username" name="username"
+             placeholder="Enter your username" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="password" class="form-label"><i class="fa-solid fa-lock me-1"></i> Password</label>
+      <div class="input-group">
+        <input type="password" class="form-control" id="password" name="password"
+               placeholder="Enter your password" required>
+        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+          <i class="fa-solid fa-eye" id="toggleIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" id="loginBtn" class="btn btn-primary w-100 fw-bold">
+      <i class="fa-solid fa-sign-in-alt me-1"></i> Log In
+    </button>
+  </form>
+
+  <!-- Footer Links -->
+  <div class="text-center mt-4">
+    <p class="mb-1">
+      <i class="fa-regular fa-user me-1"></i> Don't have an account?
+      <a href="{{ url_for('register') }}" class="text-decoration-none">Register here</a>
+    </p>
+    <p class="mb-0">
+      <i class="fa-solid fa-key me-1"></i> Forgot password?
+      <a href="{{ url_for('forgot_password') }}" class="text-decoration-none">Reset here</a>
+    </p>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  function togglePassword() {
+    const input = document.getElementById("password");
+    const icon = document.getElementById("toggleIcon");
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.replace("fa-eye", "fa-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.replace("fa-eye-slash", "fa-eye");
+    }
+  }
+
+  function disableSubmit() {
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Logging in...';
+    return true;
+  }
+</script>
+
+<!-- Font Awesome (if not already included in base.html) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+{% endblock %}

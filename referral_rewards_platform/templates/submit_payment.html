@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Submit Payment | UNI-REF{% endblock %}
+{% block content %}
+
+<div class="container mt-5 pt-4" style="max-width: 600px;">
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- Card -->
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h2 class="text-center text-primary mb-3"><i class="fas fa-money-check-alt me-2"></i>Submit Payment</h2>
+      <p class="text-center text-muted mb-3">
+        Please make a one-time payment of <strong>₦2,000</strong> to the account below and upload your payment proof.
+      </p>
+
+      <div class="alert alert-info text-center fw-semibold">
+        <p class="mb-1"><i class="fas fa-user me-1 text-primary"></i><strong>Account Name:</strong> EMMANUEL CHIDERA ALOKWEM</p>
+        <p class="mb-1"><i class="fas fa-hashtag me-1 text-primary"></i><strong>Account Number:</strong> 6856981107</p>
+        <p class="mb-0"><i class="fas fa-university me-1 text-primary"></i><strong>Bank:</strong> Moniepoint MFB</p>
+      </div>
+
+      <form action="{{ url_for('submit_payment') }}" method="POST" enctype="multipart/form-data" onsubmit="return disableBtn();">
+        {% if form and form.csrf_token %}
+          {{ form.csrf_token }}
+        {% else %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
+
+        <div class="mb-3">
+          <label for="paymentMethod" class="form-label"><i class="fas fa-credit-card me-1 text-secondary"></i>Payment Method</label>
+          <input type="text" class="form-control" id="paymentMethod" name="payment_method" placeholder="e.g. Bank Transfer, POS" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="transactionId" class="form-label"><i class="fas fa-receipt me-1 text-secondary"></i>Transaction ID</label>
+          <input type="text" class="form-control" id="transactionId" name="transaction_id" placeholder="Enter transaction ID" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="paymentDate" class="form-label"><i class="fas fa-calendar-day me-1 text-secondary"></i>Payment Date</label>
+          <input type="date" class="form-control" id="paymentDate" name="payment_date" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="amount" class="form-label"><i class="fas fa-naira-sign me-1 text-secondary"></i>Amount (₦)</label>
+          <input type="number" class="form-control" id="amount" name="amount" min="2000" value="2000" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="proofOfPayment" class="form-label"><i class="fas fa-file-upload me-1 text-secondary"></i>Proof of Payment</label>
+          <input type="file" class="form-control" id="proofOfPayment" name="proof_of_payment" accept=".jpg,.jpeg,.png,.pdf" required>
+          <small class="text-muted">Accepted formats: JPG, PNG, PDF</small>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary w-100 fw-bold">
+          <i class="fas fa-paper-plane me-1"></i> Submit Payment
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- JS -->
+<script>
+  function disableBtn() {
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Submitting...';
+    return true;
+  }
+</script>
+
+{% endblock %}
