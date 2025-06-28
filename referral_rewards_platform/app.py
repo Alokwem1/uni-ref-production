@@ -208,7 +208,7 @@ def home():
     return render_template('home.html', current_year=datetime.now().year)
 
 # Initialize Database
-@app.before_first_request
+@app.before_request
 def create_tables():
     db.create_all()
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
