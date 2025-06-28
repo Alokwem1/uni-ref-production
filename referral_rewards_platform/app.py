@@ -268,12 +268,23 @@ def register():
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
+        confirm_password = request.form.get('confirm_password', '').strip()
         referred_by_code = request.form.get('referred_by', '').strip()
 
+        # Field validations
         if not username or not email or not password:
             flash("Username, email, and password are required.", "danger")
             return redirect(url_for("register"))
 
+        if len(password) < 6:
+            flash("Password must be at least 6 characters long.", "danger")
+            return redirect(url_for("register"))
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return redirect(url_for("register"))
+
+        # Unique constraints
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose another one.", "danger")
             return redirect(url_for("register"))
@@ -282,8 +293,7 @@ def register():
             flash("Email already exists. Please choose another one.", "danger")
             return redirect(url_for("register"))
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
+        # Referral validation
         referred_by_user = None
         if referred_by_code:
             referred_by_user = User.query.filter_by(referral_code=referred_by_code).first()
@@ -291,6 +301,8 @@ def register():
                 flash("Invalid referral code. Please check and try again.", "danger")
                 return redirect(url_for("register"))
 
+        # All good — create user
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         referral_code = generate_referral_code(username)
 
         try:
@@ -302,10 +314,10 @@ def register():
                 payment_status="Unpaid",
                 referred_by=referred_by_user.id if referred_by_user else None
             )
-
             db.session.add(new_user)
             db.session.flush()
 
+            # Track referral
             if referred_by_user:
                 new_referral = Referral(
                     referrer_id=referred_by_user.id,
@@ -314,14 +326,6 @@ def register():
                     status="Pending"
                 )
                 db.session.add(new_referral)
-
-                # ✅ ADD THIS: Record referral bonus as a transaction
-                referral_transaction = Transaction(
-                    user_id=referred_by_user.id,
-                    amount=REWARD_AMOUNT,
-                    type="Referral Bonus"
-                )
-                db.session.add(referral_transaction)
 
             db.session.commit()
             flash("Registration successful. Please log in and complete your payment.", "success")
@@ -334,7 +338,6 @@ def register():
             return redirect(url_for("register"))
 
     return render_template("register.html")
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
