@@ -105,10 +105,10 @@
         <div class="card-body">
           <h5 class="card-title text-success"><i class="fas fa-wallet me-1"></i> Total Earnings</h5>
           <h2 class="fw-bold text-success mb-3">₦{{ total_earnings }}</h2>
-          <a href="{{ url_for('cashout') }}" class="btn btn-success w-100 {% if total_earnings < 15000 %}disabled{% endif %}" title="{% if total_earnings < 15000 %}Minimum ₦15,000 required{% else %}Withdraw now{% endif %}">
+          <a href="{{ url_for('cashout') }}" class="btn btn-success w-100 {% if total_earnings < 1500 %}disabled{% endif %}" title="{% if total_earnings < 1500 %}Minimum ₦1,500 required{% else %}Withdraw now{% endif %}">
             <i class="fas fa-hand-holding-usd me-1"></i> Cash Out
           </a>
-          <p class="small text-muted mt-2">Minimum withdrawal: ₦15,000</p>
+          <p class="small text-muted mt-2">Minimum withdrawal: ₦1,500</p>
         </div>
       </div>
     </div>
