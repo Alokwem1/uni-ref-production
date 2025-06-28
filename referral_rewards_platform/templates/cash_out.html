@@ -57,7 +57,7 @@
     <div class="text-center mb-4">
       <div><strong>Total Balance:</strong> ₦{{ computed_referral_balance }}</div>
       <div><strong>Available to Withdraw:</strong> <span class="text-success">₦{{ available_balance | round(2) }}</span></div>
-      <small class="text-muted d-block mt-2">Minimum withdrawal: ₦15,000 | Withdrawals processed manually.</small>
+      <small class="text-muted d-block mt-2">Minimum withdrawal: ₦1,500 | Withdrawals processed manually.</small>
     </div>
 
     <form method="POST" action="{{ url_for('cashout') }}" onsubmit="return handleSubmit();">
@@ -69,8 +69,8 @@
 
       <div class="mb-3">
         <label for="amount" class="form-label">Amount to Withdraw (₦)</label>
-        <input type="number" class="form-control" name="amount" id="amount" required min="15000"
-               placeholder="e.g. 15000">
+        <input type="number" class="form-control" name="amount" id="amount" required min="1500"
+               placeholder="e.g. 1500">
       </div>
 
       <div class="mb-3">
