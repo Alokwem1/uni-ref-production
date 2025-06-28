@@ -2,10 +2,10 @@ services:
   - type: web
     name: uni-ref
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    buildCommand: pip install -r referral_rewards_platform/requirements.txt
+    startCommand: gunicorn referral_rewards_platform.app:app
     envVars:
       - key: FLASK_ENV
         value: production
       - key: DATABASE_URL
-        value: sqlite:///instance/app.db
+        value: sqlite:///referral_rewards_platform/instance/app.db
