@@ -831,8 +831,8 @@ def cashout():
 
             amount = float(amount)
 
-            if amount < 15000:
-                flash("Minimum cashout is ₦15,000.", "warning")
+            if amount < 1500:
+                flash("Minimum cashout is ₦1,500.", "warning")
                 return redirect(url_for('cashout'))
 
             if amount > available_balance:
